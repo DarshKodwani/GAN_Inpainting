@@ -1,0 +1,67 @@
+\documentclass[aps,prd,twocolumn,amsmath,amssymb,floatfix,nofootinbib,superscriptaddress]{revtex4-1}
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{bm}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage[normalem]{ulem}
+%\usepackage{subfig}
+\usepackage{sidecap}
+\usepackage{subcaption}
+
+\usepackage[colorlinks,bookmarks]{hyperref}
+\definecolor{linkblue}{rgb}{0,0,0.8}
+\definecolor{linkgreen}{rgb}{0,0.5,0}
+
+\hypersetup{pdfpagemode=UseNone, pdfstartview=FitH, linkcolor=linkblue, %
+            citecolor=linkgreen, urlcolor=linkblue}
+            
+\providecommand{\eprint}[1]{\href{http://arxiv.org/abs/#1}{#1}}
+\bibliographystyle{apsrev4-1}
+\graphicspath{{Figures/}}
+
+\newcommand{\dk}[1]{\textcolor{blue}{DK: #1}}
+
+\begin{document}
+
+\title{Inpainting CMB maps using generative adverserial networks }
+
+\author{Darsh Kodwani and freinds}
+\email{darsh.kodwani@physics.ox.ac.uk}
+\affiliation{Department of Physics, University of Oxford, Denys Wilkinson Building, Keble Road, Oxford, OX1 3RH, UK.}
+
+\begin{abstract}
+We propose a novel method for inpainting noisy masked CMB maps using GAN's (and maybe Autoencoders and variational autoencoders). 
+
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+The CMB has been one of the primary sources of information to understand the origin and evolution of the universe for many decades \cite{}. 
+The 
+
+\section{Review of current methods}
+
+Review literature and current methods - maybe point out where they fail.
+\section{Introducing GANs}
+
+Introduction to GAN's in an intuitive way and the use case for CMB maps. Maybe describe (variational) autoencoders if we decide to use them. 
+\section{Analysis}
+
+See how well GAN's do compared to standard techniques to reproduce the maps and maybe the Cl's.
+
+\section{Conclusion}
+
+The GAN's can reproduce the CMB maps with inpainting to $XXX$ accuracy.
+
+\section*{Acknowledgments}
+\noindent
+
+DK acknowledges financial support from ERC Grant No: 693024. 
+
+\bibliography{all_active}
+
+\end{document}
