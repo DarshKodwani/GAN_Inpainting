@@ -15,10 +15,9 @@ from keras.optimizers import Adam
 
 """ First lets make sure we understand the dataset from mnist (commented out for running)"""
 
-"""
 #print(np.shape(mnist.load_data()))
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
-
+""""
 # Type of data
 print("Type of x data:", type(x_train))
 print("Type of y data:", type(y_train))
@@ -32,7 +31,7 @@ print("1st element of y:", y_train[0])
 for i in range(4) :
     plt.imshow(x_train[i,:,:])
     plt.show()
-quit()
+#quit()
 """
 ### Masking info ###
 
@@ -41,9 +40,9 @@ def mask(x_ini, x_end, y_ini, y_end) :
 
 #Mask params
 masking = True
-x_ini = 10 ; x_end = 20 ; y_ini = 10; y_end = 20
+x_ini = 5 ; x_end = 20 ; y_ini = 5; y_end = 20
 
-"""
+
 print(x_train[0,x_ini:x_end, y_ini:y_end])
 plt.imshow(x_train[0, :, :])
 plt.show()
@@ -67,14 +66,14 @@ plt.show()
 print(x_train[0,:,:])
 print(np.zeros[5,5])
 quit()
-"""
+
 
 ### Load data ###
 
-def load_data() : 
+def load_data(mask = False) : 
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
     x_train = (x_train.astype(np.float32) - 127.5)/127.5 # Not sure what this is doing
-    if masking == True :
+    if mask == True :
         for i in range(len(x_train[:,0,0])) :
             x_train[i, x_ini:x_end, y_ini:y_end] = mask(x_ini, x_end, y_ini, y_end)
             plt.imshow(x_train[i, :, :])
@@ -95,7 +94,7 @@ def adam_optimizer() :
 ### Generator network ###
 def create_generator() : 
     generator = Sequential()
-    generator.add(Dense(units = 256, input_dim = 100))
+    generator.add(Dense(units = 256, input_dim = 100)) #DK TODO : set input dimension to 784 (i.e masked images)
     generator.add(LeakyReLU(0.2))
     
     generator.add(Dense(units = 512))
@@ -183,7 +182,7 @@ def training(epochs = 1, batch_size = 128) :
         for _ in tqdm(range(batch_size)) : 
             #generate random noise as input to initialize the generator
 
-            noise = np.random.normal(0, 1, [batch_size, 100])
+            noise = np.random.normal(0, 1, [batch_size, 100]) #DK TODO :This is (128,100) array - we want it to be (128, 784)
 
             #Generate fake MNIST images from noised input 
             generated_images = generator.predict(noise)
