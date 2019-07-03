@@ -121,7 +121,7 @@ def plot_generated_images(epoch, generator, examples = 100, dim = (10, 10), figs
         plt.imshow(generated_images[i], interpolation = 'nearest')
         plt.axis('off')
     plt.tight_layout()
-    plt.savefig('/GAN_masked_generator/gan_generated_image_masked_%d.pdf' %epoch)
+    plt.savefig('gan_generated_image_masked_%d.pdf' %epoch)
 
 ### Train GAN ###
 
