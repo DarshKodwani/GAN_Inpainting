@@ -86,7 +86,7 @@ def load_data(mask = False) :
 
 (X_train_mask, y_train_mask, X_test_mask, y_test_mask) = load_data(mask == True)
 
-def adam_optimizer() : 
+def adam_optimizer() :
     return Adam(lr = 0.0002, beta_1 = 0.5)
 
 ### Generator network ###
@@ -154,11 +154,9 @@ d.summary()
                 
 ### Create GAN ###
 
-def create_gan(discriminator, generator, mask = False) : 
+def create_gan(discriminator, generator) :
     discriminator.trainable = False 
-    gan_input = Input(shape = (100,))
-    if mask == True : 
-        gan_input = Input(shape = (784,))
+    gan_input = Input(shape = (784,))
     X = generator(gan_input)
     gan_output = discriminator(X)
     gan = Model(inputs = gan_input, outputs = gan_output)
@@ -172,6 +170,14 @@ gan.summary()
 
 def plot_generated_images(epoch, generator, examples = 100, dim = (10, 10), figsize = (10, 10)) : 
     noise = np.random.normal(loc = 0, scale = 1, size = [examples, 100])
+    (X_train_mask, y_train_mask, X_test_mask, y_test_mask) = load_data(mask == True)
+    noise = []
+    for i in range(examples) : 
+        noise.append(X_train_mask[np.random.randint(low = 0, high = X_train.shape[0], size = 784)])
+    print(np.shape(X_train_mask[np.random.randint(low = 0, high = X_train.shape[0], size = 784)]))
+    noise = np.array(noise)
+    print("NOISE SHAPE IN GENERATED IMAGES!!!!", np.shape(noise))
+    quit()
     generated_images = generator.predict(noise)
     generated_images = generated_images.reshape(100, 28, 28)
     plt.figure(figsize = figsize)
@@ -180,15 +186,16 @@ def plot_generated_images(epoch, generator, examples = 100, dim = (10, 10), figs
         plt.imshow(generated_images[i], interpolation = 'nearest')
         plt.axis('off')
     plt.tight_layout()
-    plt.savefig('gan_generated_image %d.pdf' %epoch)
+    plt.savefig('gan_generated_image_masked %d.pdf' %epoch)
 
 ### Train GAN ###
 
 def training(epochs = 1, batch_size = 128) : 
     
     #Loading data
-    (X_trian, y_train, X_test, y_test) = load_data()
-    batch_count = X_trian.shape[0] / batch_size 
+    (X_train, y_train, X_test, y_test) = load_data()
+    (X_train_mask, y_train_mask, X_test_mask, y_test_mask) = load_data(mask == True)
+    batch_count = X_train.shape[0] / batch_size 
 
     # Creating GAN
     generator = create_generator()
@@ -200,9 +207,7 @@ def training(epochs = 1, batch_size = 128) :
         for _ in tqdm(range(batch_size)) : 
             #generate random noise as input to initialize the generator
 
-            noise = np.random.normal(0, 1, [batch_size, 100]) #DK TODO :This is (128,100) array - we want it to be (128, 784)
-            if mask == True : 
-                noise = X_trian_mask[np.random.randint(low = 0, high = X_train.shape[0], size = batch_size)]
+            noise = X_train_mask[np.random.randint(low = 0, high = X_train.shape[0], size = batch_size)]
 
             #Generate fake MNIST images from noised input 
             generated_images = generator.predict(noise)
@@ -222,7 +227,8 @@ def training(epochs = 1, batch_size = 128) :
             discriminator.train_on_batch(X, y_dis)
 
             #Tricking the noised input of the Generator as real data
-            noise = np.random.normal(0, 1, [batch_size, 100])
+            noise = X_train_mask[np.random.randint(low = 0, high = X_train.shape[0], size = batch_size)]
+
             y_gen = np.ones(batch_size)
             
             #During the training of gan the weights of discriminator should be fixed. 

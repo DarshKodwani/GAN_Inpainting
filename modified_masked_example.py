@@ -169,7 +169,12 @@ gan.summary()
 ### Plotting generated images from generator network ###
 
 def plot_generated_images(epoch, generator, examples = 100, dim = (10, 10), figsize = (10, 10)) : 
-    noise = np.random.normal(loc = 0, scale = 1, size = [examples, 100])
+#    noise = np.random.normal(loc = 0, scale = 1, size = [examples, 100])
+    (X_train_mask, y_train_mask, X_test_mask, y_test_mask) = load_data(mask == True)
+    noise = X_train_mask[np.random.randint(low = 0, high = X_train.shape[0], size = examples)]
+    noise = np.array(noise)
+#    print("NOISE SHAPE IN GENERATED IMAGES!!!!", np.shape(noise))
+#    quit()
     generated_images = generator.predict(noise)
     generated_images = generated_images.reshape(100, 28, 28)
     plt.figure(figsize = figsize)
