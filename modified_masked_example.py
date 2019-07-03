@@ -42,7 +42,7 @@ def mask(x_ini, x_end, y_ini, y_end) :
 masking = True
 x_ini = 5 ; x_end = 20 ; y_ini = 5; y_end = 20
 
-
+"""
 print(x_train[0,x_ini:x_end, y_ini:y_end])
 plt.imshow(x_train[0, :, :])
 plt.show()
@@ -66,7 +66,7 @@ plt.show()
 print(x_train[0,:,:])
 print(np.zeros[5,5])
 quit()
-
+"""
 
 ### Load data ###
 
@@ -76,28 +76,44 @@ def load_data(mask = False) :
     if mask == True :
         for i in range(len(x_train[:,0,0])) :
             x_train[i, x_ini:x_end, y_ini:y_end] = mask(x_ini, x_end, y_ini, y_end)
-            plt.imshow(x_train[i, :, :])
-            plt.show()
-            quit()
-
     # convert shape of x_train from (60000, 29, 29) to (60000, 784)
     #784 columns per row
     x_train = x_train.reshape(60000, 784)
     return (x_train, y_train, x_test, y_test)
 
-(X_train, y_train, X_test, y_test) = load_data()
-print(X_train.shape)
 
-def adam_optimizer() : 
+(X_train, y_train, X_test, y_test) = load_data()
+
+(X_train_mask, y_train_mask, X_test_mask, y_test_mask) = load_data(mask == True)
+
+def adam_optimizer() :
     return Adam(lr = 0.0002, beta_1 = 0.5)
 
 ### Generator network ###
+"""
 def create_generator() : 
     generator = Sequential()
     generator.add(Dense(units = 256, input_dim = 100)) #DK TODO : set input dimension to 784 (i.e masked images)
     generator.add(LeakyReLU(0.2))
     
     generator.add(Dense(units = 512))
+    generator.add(LeakyReLU(0.2))
+    
+    generator.add(Dense(units = 1024))
+    generator.add(LeakyReLU(0.2))
+
+    generator.add(Dense(units = 784, activation = 'tanh'))
+
+    generator.compile(loss = 'binary_crossentropy', optimizer = adam_optimizer())
+    
+    return generator
+"""
+def create_generator() : 
+    generator = Sequential()
+    generator.add(Dense(units = 1024, input_dim = 784)) #DK TODO : set input dimension to 784 (i.e masked images)
+    generator.add(LeakyReLU(0.2))
+    
+    generator.add(Dense(units = 2048))
     generator.add(LeakyReLU(0.2))
     
     generator.add(Dense(units = 1024))
@@ -138,9 +154,9 @@ d.summary()
                 
 ### Create GAN ###
 
-def create_gan(discriminator, generator) : 
+def create_gan(discriminator, generator) :
     discriminator.trainable = False 
-    gan_input = Input(shape = (100,))
+    gan_input = Input(shape = (784,))
     X = generator(gan_input)
     gan_output = discriminator(X)
     gan = Model(inputs = gan_input, outputs = gan_output)
@@ -162,15 +178,16 @@ def plot_generated_images(epoch, generator, examples = 100, dim = (10, 10), figs
         plt.imshow(generated_images[i], interpolation = 'nearest')
         plt.axis('off')
     plt.tight_layout()
-    plt.savefig('gan_generated_image %d.pdf' %epoch)
+    plt.savefig('gan_generated_image_masked %d.pdf' %epoch)
 
 ### Train GAN ###
 
 def training(epochs = 1, batch_size = 128) : 
     
     #Loading data
-    (X_trian, y_train, X_test, y_test) = load_data()
-    batch_count = X_trian.shape[0] / batch_size 
+    (X_train, y_train, X_test, y_test) = load_data()
+    (X_train_mask, y_train_mask, X_test_mask, y_test_mask) = load_data(mask == True)
+    batch_count = X_train.shape[0] / batch_size 
 
     # Creating GAN
     generator = create_generator()
@@ -182,7 +199,7 @@ def training(epochs = 1, batch_size = 128) :
         for _ in tqdm(range(batch_size)) : 
             #generate random noise as input to initialize the generator
 
-            noise = np.random.normal(0, 1, [batch_size, 100]) #DK TODO :This is (128,100) array - we want it to be (128, 784)
+            noise = X_train_mask[np.random.randint(low = 0, high = X_train.shape[0], size = batch_size)]
 
             #Generate fake MNIST images from noised input 
             generated_images = generator.predict(noise)
@@ -202,7 +219,8 @@ def training(epochs = 1, batch_size = 128) :
             discriminator.train_on_batch(X, y_dis)
 
             #Tricking the noised input of the Generator as real data
-            noise = np.random.normal(0, 1, [batch_size, 100])
+            noise = X_train_mask[np.random.randint(low = 0, high = X_train.shape[0], size = batch_size)]
+
             y_gen = np.ones(batch_size)
             
             #During the training of gan the weights of discriminator should be fixed. 

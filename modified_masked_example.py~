@@ -15,10 +15,9 @@ from keras.optimizers import Adam
 
 """ First lets make sure we understand the dataset from mnist (commented out for running)"""
 
-"""
 #print(np.shape(mnist.load_data()))
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
-
+""""
 # Type of data
 print("Type of x data:", type(x_train))
 print("Type of y data:", type(y_train))
@@ -32,7 +31,7 @@ print("1st element of y:", y_train[0])
 for i in range(4) :
     plt.imshow(x_train[i,:,:])
     plt.show()
-quit()
+#quit()
 """
 ### Masking info ###
 
@@ -41,7 +40,7 @@ def mask(x_ini, x_end, y_ini, y_end) :
 
 #Mask params
 masking = True
-x_ini = 10 ; x_end = 20 ; y_ini = 10; y_end = 20
+x_ini = 5 ; x_end = 20 ; y_ini = 5; y_end = 20
 
 """
 print(x_train[0,x_ini:x_end, y_ini:y_end])
@@ -71,34 +70,50 @@ quit()
 
 ### Load data ###
 
-def load_data() : 
+def load_data(mask = False) : 
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
     x_train = (x_train.astype(np.float32) - 127.5)/127.5 # Not sure what this is doing
-    if masking == True :
+    if mask == True :
         for i in range(len(x_train[:,0,0])) :
             x_train[i, x_ini:x_end, y_ini:y_end] = mask(x_ini, x_end, y_ini, y_end)
-            plt.imshow(x_train[i, :, :])
-            plt.show()
-            quit()
-
     # convert shape of x_train from (60000, 29, 29) to (60000, 784)
     #784 columns per row
     x_train = x_train.reshape(60000, 784)
     return (x_train, y_train, x_test, y_test)
 
+
 (X_train, y_train, X_test, y_test) = load_data()
-print(X_train.shape)
+
+(X_train_mask, y_train_mask, X_test_mask, y_test_mask) = load_data(mask == True)
 
 def adam_optimizer() : 
     return Adam(lr = 0.0002, beta_1 = 0.5)
 
 ### Generator network ###
+"""
 def create_generator() : 
     generator = Sequential()
-    generator.add(Dense(units = 256, input_dim = 100))
+    generator.add(Dense(units = 256, input_dim = 100)) #DK TODO : set input dimension to 784 (i.e masked images)
     generator.add(LeakyReLU(0.2))
     
     generator.add(Dense(units = 512))
+    generator.add(LeakyReLU(0.2))
+    
+    generator.add(Dense(units = 1024))
+    generator.add(LeakyReLU(0.2))
+
+    generator.add(Dense(units = 784, activation = 'tanh'))
+
+    generator.compile(loss = 'binary_crossentropy', optimizer = adam_optimizer())
+    
+    return generator
+"""
+def create_generator() : 
+    generator = Sequential()
+    generator.add(Dense(units = 1024, input_dim = 784)) #DK TODO : set input dimension to 784 (i.e masked images)
+    generator.add(LeakyReLU(0.2))
+    
+    generator.add(Dense(units = 2048))
     generator.add(LeakyReLU(0.2))
     
     generator.add(Dense(units = 1024))
@@ -139,9 +154,11 @@ d.summary()
                 
 ### Create GAN ###
 
-def create_gan(discriminator, generator) : 
+def create_gan(discriminator, generator, mask = False) : 
     discriminator.trainable = False 
     gan_input = Input(shape = (100,))
+    if mask == True : 
+        gan_input = Input(shape = (784,))
     X = generator(gan_input)
     gan_output = discriminator(X)
     gan = Model(inputs = gan_input, outputs = gan_output)
@@ -183,7 +200,9 @@ def training(epochs = 1, batch_size = 128) :
         for _ in tqdm(range(batch_size)) : 
             #generate random noise as input to initialize the generator
 
-            noise = np.random.normal(0, 1, [batch_size, 100])
+            noise = np.random.normal(0, 1, [batch_size, 100]) #DK TODO :This is (128,100) array - we want it to be (128, 784)
+            if mask == True : 
+                noise = X_trian_mask[np.random.randint(low = 0, high = X_train.shape[0], size = batch_size)]
 
             #Generate fake MNIST images from noised input 
             generated_images = generator.predict(noise)
