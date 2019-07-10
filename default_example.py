@@ -123,15 +123,15 @@ def plot_generated_images(epoch, generator, examples = 100, dim = (10, 10), figs
         plt.imshow(generated_images[i], interpolation = 'nearest')
         plt.axis('off')
     plt.tight_layout()
-    plt.savefig('gan_generated_image %d.pdf' %epoch)
+    plt.savefig('new/gan_generated_image %d' %epoch)
 
 ### Train GAN ###
 
 def training(epochs = 1, batch_size = 128) : 
     
     #Loading data
-    (X_trian, y_train, X_test, y_test) = load_data()
-    batch_count = X_trian.shape[0] / batch_size 
+    (X_train, y_train, X_test, y_test) = load_data()
+    batch_count = X_train.shape[0] / batch_size 
 
     # Creating GAN
     generator = create_generator()
@@ -173,7 +173,7 @@ def training(epochs = 1, batch_size = 128) :
 
             gan.train_on_batch(noise, y_gen)
             
-        if e == 1 or e & 20 ==0 : 
-            plot_generated_images(e, generator)
+        #if e == 1 or e & 20 ==0 : 
+        #    plot_generated_images(e, generator)
 
 training(400, 128)
